@@ -1,11 +1,6 @@
 package wsl.dlokami.api;
 
-import com.openai.client.OpenAIClient;
-import com.openai.core.http.StreamResponse;
-import com.openai.models.chat.completions.ChatCompletion;
-import com.openai.models.chat.completions.ChatCompletionChunk;
-import jakarta.annotation.Resource;
-import com.openai.models.responses.Response;
+import org.springframework.ai.chat.model.ChatResponse;
 import reactor.core.publisher.Flux;
 
 /**
@@ -24,7 +19,7 @@ public interface IAiService {
      * @param message 消息
      * @Return: 生成文本
      **/
-    ChatCompletion generate(String model, String message);
+    ChatResponse generate(String model, String message);
 
     /**
      * @description: 流式输出
@@ -34,6 +29,6 @@ public interface IAiService {
      * @param message 消息
      * @Return: 流式文本
      **/
-    Flux<ChatCompletionChunk> generateStream(String model, String message);
+    Flux<ChatResponse> generateStream(String model, String message);
 
 }

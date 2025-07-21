@@ -36,9 +36,8 @@
         <!--            <artifactId>spring-ai-pgvector-store</artifactId>-->
         <!--        </dependency>-->
         <dependency>
-            <groupId>com.openai</groupId>
-            <artifactId>openai-java</artifactId>
-            <version>2.6.0</version>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
         </dependency>
 
         <dependency>

@@ -1,16 +1,13 @@
 package wsl.dlokami.trigger.http;
 
-import com.openai.client.OpenAIClient;
-import com.openai.core.http.StreamResponse;
-import com.openai.models.chat.completions.ChatCompletion;
-import com.openai.models.chat.completions.ChatCompletionChunk;
-import com.openai.models.chat.completions.ChatCompletionCreateParams;
-import com.openai.models.responses.Response;
-import com.openai.models.responses.ResponseCreateParams;
-import com.openai.models.responses.ResponseStreamEvent;
-import io.reactivex.rxjava3.core.Flowable;
-import jakarta.annotation.Resource;
+
+import com.alibaba.cloud.ai.dashscope.api.DashScopeAgentApi;
+import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import wsl.dlokami.api.IAiService;
@@ -23,40 +20,43 @@ import wsl.dlokami.api.IAiService;
 
 @RestController()
 @CrossOrigin("*")
-@RequestMapping("/api/v1/qwen")
+@RequestMapping("/api/v1/chat")
 @Slf4j
 public class ModelController implements IAiService {
 
-    @Resource(name = "qwenClient")
-    private OpenAIClient chatClient;
+    private final ChatModel chatModel;
+
+    public ModelController(ChatModel chatModel) {
+        this.chatModel = chatModel;
+    }
+
 
     @RequestMapping(value = "generate",method = RequestMethod.GET)
     @Override
-    public ChatCompletion generate(@RequestParam String model, @RequestParam String message) {
+    public ChatResponse generate(@RequestParam String model, @RequestParam String message) {
 
-        ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
-                .model(model)
-                .addUserMessage(message)
+
+        DashScopeChatOptions customOptions = DashScopeChatOptions.builder()
+                .withTopP(0.7)
+                .withTopK(50)
+                .withTemperature(0.8)
+                .withModel(model)
                 .build();
 
-        ChatCompletion chatCompletion = chatClient.chat().completions().create(params);
-        log.info(chatCompletion.toString());
-
-        return chatCompletion;
+        return chatModel.call(new Prompt(message, customOptions));
     }
 
     @RequestMapping(value = "generate_stream",method = RequestMethod.GET)
     @Override
-    public Flux<ChatCompletionChunk> generateStream(@RequestParam String model, @RequestParam String message) {
+    public Flux<ChatResponse> generateStream(@RequestParam String model, @RequestParam String message) {
 
-        ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
-                .model(model)
-                .addUserMessage(message)
+        DashScopeChatOptions customOptions = DashScopeChatOptions.builder()
+                .withTopP(0.7)
+                .withTopK(50)
+                .withTemperature(0.8)
+                .withModel(model)
                 .build();
 
-        StreamResponse<ChatCompletionChunk> streaming = chatClient.chat().completions().createStreaming(params);
-        return Flux.fromStream(streaming.stream()).doFinally(signalType -> streaming.close());
-
-
+        return chatModel.stream(new Prompt(message,customOptions));
     }
 }

@@ -69,7 +69,7 @@
         addMessage('<span class="animate-pulse">▍</span>');
 
         // 构建API URL
-        const apiUrl = `http://localhost:8090/api/v1/qwen/generate_stream?model=qwen-plus&message=${encodeURIComponent(message)}`;
+        const apiUrl = `http://localhost:8090/api/v1/chat/generate_stream?model=qwen-plus&message=${encodeURIComponent(message)}`;
 
         // 使用EventSource接收流式响应
         const eventSource = new EventSource(apiUrl);
@@ -78,15 +78,16 @@
         eventSource.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
-                const content = data.choices?.[0]?.delta?.content || '';
-                const finishReason = data.choices?.[0]?.finish_reason;
+                const content = data.result?.output?.text || '';
+                const finishReason = data.result?.metadata?.finishReason;
+
 
                 if (content) {
                     buffer += content;
                     updateLastMessage(buffer + '<span class="animate-pulse">▍</span>');
                 }
 
-                if (finishReason === 'stop') {
+                if (finishReason === 'STOP') {
                     eventSource.close();
                     updateLastMessage(buffer); // 移除加载动画
                 }

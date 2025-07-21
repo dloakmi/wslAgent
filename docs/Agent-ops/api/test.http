@@ -1,0 +1,3 @@
+GET http://localhost:8090/api/v1/chat/generate_stream?
+    model=qwen-plus&
+    message=hello
